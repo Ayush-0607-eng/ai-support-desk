@@ -3,15 +3,16 @@ import Message from "../models/Message.js";
 import Ticket from "../models/Ticket.js";
 import { queryRag } from "../utils/aiClient.js";
 import { sendTicketReplyEmail } from "../utils/emailClient.js";
+import { canReply } from "../utils/permissions.js";
 
 const getOrgTicket = async (ticketId, organization) => {
   return Ticket.findOne({ _id: ticketId, organization });
 };
 
-const canReply = (ticket, user) => {
-  if (user.role === "admin") return true;
-  return (ticket.assignedAgents || []).some((id) => id.toString() === user._id.toString());
-};
+// const canReply = (ticket, user) => {
+//   if (user.role === "admin") return true;
+//   return (ticket.assignedAgents || []).some((id) => id.toString() === user._id.toString());
+// };
 
 export const getMessages = asyncHandler(async (req, res) => {
   const ticket = await getOrgTicket(req.params.ticketId, req.user.organization);

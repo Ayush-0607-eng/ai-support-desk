@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
 import Ticket from "../models/Ticket.js";
 import Message from "../models/Message.js";
+import { canReply } from "../utils/permissions.js";
 
 export const createTicket = asyncHandler(async (req, res) => {
   const { subject, description, customerName, customerEmail, priority, category } = req.body;
@@ -48,6 +49,10 @@ export const updateTicket = asyncHandler(async (req, res) => {
   if (!ticket) {
     res.status(404);
     throw new Error("Ticket not found");
+  }
+  if (!canReply(ticket, req.user)) {
+    res.status(403);
+    throw new Error("Only the admin or agents assigned to this ticket can update it");
   }
   const updatable = ["subject", "description", "status", "priority", "category", "tags"];
   updatable.forEach((field) => {
